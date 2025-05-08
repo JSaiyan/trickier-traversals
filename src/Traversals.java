@@ -1,6 +1,10 @@
+import java.lang.classfile.Signature;
+import java.lang.classfile.instruction.ThrowInstruction;
 import java.util.*;
+import javax.xml.validation.Validator;
 
-public class Traversals {
+public class Traversals 
+{
 
   /**
    * Returns the sum of the values of all leaf nodes in the given tree of integers.
@@ -10,8 +14,26 @@ public class Traversals {
    * @param node the node of the tree
    * @return the sum of leaf node values, or 0 if the tree is null
    */
-  public static int sumLeafNodes(TreeNode<Integer> node) {
-    return 0;
+  public static int sumLeafNodes(TreeNode<Integer> node) 
+  {
+    //If node is null, this method returns 0. //base.case
+    if (node == null) return 0;
+
+    //making sum = 0
+    //starts 0
+    int sum = 0;
+
+    // check to see if the leaf has no childern
+    //adds value of node.value to sum
+    if(node.left == null && node.right == null) sum += node.value;
+
+    //add value from the method call to sum varaible 
+    sum += sumLeafNodes(node.left);
+    sum += sumLeafNodes(node.right);
+    
+
+    return sum;
+
   }
 
   /**
@@ -22,8 +44,21 @@ public class Traversals {
    * @param node the node of the tree
    * @return the count of internal nodes, or 0 if the tree is null
    */
-  public static int countInternalNodes(TreeNode<Integer> node) {
-    return 0;
+  public static int countInternalNodes(TreeNode<Integer> node) 
+  {
+    //base case
+    if(node == null) return 0;
+
+    //if both are null return 0
+    if ( node.left == null && node.right == null) return 0;
+
+    int count = 1;
+    
+      count += countInternalNodes(node.left);
+      count += countInternalNodes(node.right);
+  
+    return count;
+    
   }
 
   /**
@@ -36,8 +71,18 @@ public class Traversals {
    * @param <T>  the type of values stored in the tree
    * @return a post-order traversal string, or an empty string if the tree is null
    */
-  public static <T> String buildPostOrderString(TreeNode<T> node) {
-    return null;
+  public static <T> String buildPostOrderString(TreeNode<T> node) 
+  {
+    //base case
+    if (node == null) return "";
+
+    //create left and right to assigne node left and right
+    String left = buildPostOrderString(node.left);
+    String right = buildPostOrderString(node.right);
+
+    //post order check left then right 
+    return left + right + node.value; 
+
   }
 
   /**
@@ -48,8 +93,52 @@ public class Traversals {
    * @param <T>  the type of values stored in the tree
    * @return a list of node values in a top-to-bottom order, or an empty list if the tree is null
    */
-  public static <T> List<T> collectLevelOrderValues(TreeNode<T> node) {
-    return null;
+  public static <T> List<T> collectLevelOrderValues(TreeNode<T> node) 
+  {
+    //list to store resuklt
+    List<T> arrayL = new ArrayList<>();
+    if (node == null) return arrayL;
+
+    //Add the current node's value to the result list
+    arrayL.add(node.value);
+    //get l and r level values
+    List<T> left = collectLevelOrderValues(node.left);
+    List<T> right = collectLevelOrderValues(node.right);
+
+    //we need to iterate over the larger size in order to extract all values
+    //checking if left is longer than or =
+
+    //filter long vs short 
+    List<T>longList = null;
+    List<T>shortList = null;
+
+    if(left.size() >= right.size())
+    {
+      longList = left;
+      shortList = right;
+    }
+    else if (left.size() >= right.size())
+    {
+      longList = right;
+      shortList = left;
+    }
+   
+
+    //merge and loop through the long list 
+    if(longList != null)
+    {
+      for (int i =0; i < longList.size(); i++)
+      {
+        arrayL.add(longList.get(i));
+        //add short
+        if(shortList != null && i < shortList.size())
+        {
+          arrayL.add(shortList.get(i));
+        }
+      }
+    }
+    return arrayL;
+
   }
 
   /**
@@ -59,8 +148,41 @@ public class Traversals {
    * @param node the node of the tree
    * @return the number of unique values in the tree, or 0 if the tree is null
    */
-  public static int countDistinctValues(TreeNode<Integer> node) {
-    return 0;
+  public static int countDistinctValues(TreeNode<Integer> node) 
+  {
+    //basecase
+    if (node == null) return 0;
+  
+    //this will let us know the amount of distinct values
+    return countDistinctHelper(node).size();
+
+  }
+
+  
+  public static Set<Integer> countDistinctHelper(TreeNode<Integer> node)
+  {
+    //creating hashset that will contain these unique values
+    Set<Integer> distinctInteger = new HashSet<>();
+    if(node == null)
+    {
+      return distinctInteger;
+    }
+
+    //creating object left to node.left 
+    //creating object right to node.right
+    Set<Integer> left = countDistinctHelper(node.left);
+    Set<Integer> right = countDistinctHelper(node.right);
+
+
+    //add all values from the sets that were return to the left and right varaibles 
+    //sets can not contain dupes they have to be unique
+    distinctInteger.addAll(left);
+    distinctInteger.addAll(right);
+    //make sure the value of the node currently is added to the distinctInteger set
+    distinctInteger.add(node.value);
+
+    return distinctInteger;
+
   }
 
   /**
@@ -71,9 +193,39 @@ public class Traversals {
    * @param node the node of the tree
    * @return true if there exists a strictly increasing root-to-leaf path, false otherwise
    */
-  public static boolean hasStrictlyIncreasingPath(TreeNode<Integer> node) {
-    return false;
+  public static boolean hasStrictlyIncreasingPath(TreeNode<Integer> node) 
+  {
+    //base case
+    if (node == null)
+    {
+      return false;
+    }
+
+    //check left and right 
+    boolean left = hasStrictlyIncreasingPath(node.left);
+    boolean right = hasStrictlyIncreasingPath(node.right);
+
+    //if node has no children return true
+    if (node.left == null && node.right == null)
+    {
+      return true;
+    }
+
+    //left child exists and continues a strictly increasing path
+    if (left && node.value < node.left.value)
+    {
+      return true;
+    }
+    //if the right child exists and continues a strictly increasing path
+    if (right && node.value < node.right.value)
+    {
+      return true;
+    }
+
+   return false;
   }
+
+
 
   // OPTIONAL CHALLENGE
   /**
@@ -86,8 +238,9 @@ public class Traversals {
    * @param <T>   the type of values stored in the trees
    * @return true if the trees have the same shape, false otherwise
    */
-  public static <T> boolean haveSameShape(TreeNode<T> nodeA, TreeNode<T> nodeB) {
-    return false;
+  public static <T> boolean haveSameShape(TreeNode<T> nodeA, TreeNode<T> nodeB) 
+  {
+
   }
 
 
@@ -118,7 +271,8 @@ public class Traversals {
    * @param node the root node of the tree
    * @return a list of lists, where each inner list represents a root-to-leaf path in pre-order
    */
-  public static <T> List<List<T>> findAllRootToLeafPaths(TreeNode<T> node) {
+  public static <T> List<List<T>> findAllRootToLeafPaths(TreeNode<T> node) 
+  {
     return null;
   }
 }
